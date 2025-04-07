@@ -1,0 +1,577 @@
+!support
+!! 
+  // import needed libraries.
+  import java.util.Map;
+  import java.util.HashMap;
+  import java.math.BigDecimal;
+  import java.lang.Math;
+  import java.util.ArrayList;
+  import java.util.Scanner;
+!!
+
+!! 
+  // create variable storage.
+  Map<String, Object> variables = new HashMap<>();
+  Map<String, AbstractAttributeBlock> procedures = new HashMap<>();
+  Map<String, String> functionReturns = new HashMap<>();
+  Scanner scanner = new Scanner(System.in);
+
+  // support function to handle arithmetic/comparisons/boolean operators.
+  public Object doAction(Object obj1, Object obj2, String op) {
+    // create needed variables.
+    boolean areInts = obj1 instanceof Integer && obj2 instanceof Integer;
+    int int1 = -1, int2 = -1;
+    BigDecimal dec1 = new BigDecimal(-1), dec2 = new BigDecimal(-1);
+    boolean bool1 = true, bool2 = true;
+    String str1 = "", str2 = "";
+
+    // assign variables based on the type of each parameter.
+    if (obj1 instanceof Integer) {
+      int1 = (int) obj1;
+      dec1 = new BigDecimal(((Integer) obj1).intValue());
+    } else if (obj1 instanceof BigDecimal) {
+      dec1 = (BigDecimal) obj1;
+    } else if (obj1 instanceof Boolean) {
+      bool1 = (Boolean) obj1;
+    } else {
+      str1 = (String) obj1;
+    }
+
+    if (obj2 instanceof Integer) {
+      int2 = (int) obj2;
+      dec2 = new BigDecimal(((Integer) obj2).intValue());
+    } else if (obj2 instanceof BigDecimal) {
+      dec2 = (BigDecimal) obj2;
+    } else if (obj2 instanceof Boolean) {
+      bool2 = (Boolean) obj2;
+    } else {
+      str2 = (String) obj2;
+    }
+
+    // switch statement to handle all arithmetic/comparisons on int/decimals, and boolean operators.
+    return switch (op) {
+      case "**" -> areInts ? (int) Math.pow(int1, int2) : BigDecimal.valueOf(Math.pow(dec1.doubleValue(), dec2.doubleValue()));
+      case "*" -> areInts ? int1 * int2 : dec1.multiply(dec2);
+      case "/" -> (areInts && int2 != 0) ? int1 / int2 : (dec2.compareTo(new BigDecimal(0)) != 0) ? dec1.divide(dec2) : 0;
+      case "%" -> (areInts && int2 != 0) ? int1 % int2 : (dec2.compareTo(new BigDecimal(0)) != 0) ? dec1.remainder(dec2) : 0;
+      case "+" -> areInts ? int1 + int2 : dec1.add(dec2);
+      case "-" -> areInts ? int1 - int2 : dec1.subtract(dec2);
+      case "_" -> obj1 instanceof Integer ? -int1 : dec1.negate();
+
+      case "==" -> dec1.compareTo(dec2) == 0;
+      case "!=" -> dec1.compareTo(dec2) != 0;
+      case ">" -> dec1.compareTo(dec2) > 0;
+      case ">=" -> dec1.compareTo(dec2) >= 0;
+      case "<" -> dec1.compareTo(dec2) < 0;
+      case "<=" -> dec1.compareTo(dec2) <= 0;
+
+      case "and" -> bool1 && bool2;
+      case "or" -> bool1 || bool2;
+      case "xor" -> bool1 ^ bool2;
+      case "not" -> !bool1;
+
+      default -> throw new RuntimeException("Unknown Operator" + op);
+    };
+  } 
+
+  // support function to get a list based on the given ID.
+  public ArrayList<Object> getList(Object ID) {
+    Object obj = variables.get(ID);
+    return (ArrayList) obj;
+  }
+
+  // support function to validate that a new item is of the correct type to be added to a list.
+  public boolean validateList(ArrayList<Object> myList, Object newItem) {
+
+    // only run if the list is not empty.
+    if (myList.size() > 0) {
+
+      // check the first item in the list, if it is a different type then we cannot add the new item to this list.
+      if(myList.get(0).getClass().getName() != newItem.getClass().getName()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // support function to convert an object to a string.
+  public String convertToString(Object obj) {
+    String returnable = "";
+    if (obj instanceof String) {
+      returnable = (String) obj;
+    } else {
+      returnable = obj.toString();
+    } 
+    return returnable;
+  }
+
+  public void clearMaps() {
+    variables.clear();
+    procedures.clear();
+    functionReturns.clear();
+  }
+!!
+
+
+// program caller.
+program ::= statements !! clearMaps(); !!
+
+
+// statement loop to allow statement chaining.
+statements ::= statement statements | statement
+
+
+// statement handler.
+statement ::= 
+ assignment ';'
+| output
+| ifstmt
+| switchstmt
+| listops
+| func
+| LINE_COMMENT
+| BLOCK_COMMENT
+
+  // try handler (try/catch/finally).
+  (* syntax:
+    try {
+      *statements*
+    } catch {
+      *statements*
+    } finally {
+      *statements*
+    }
+  *)
+| 'try' '{' statements!< '}' 'catch' '{' statements!< '}' 'finally' '{' statements!< '}'
+  !!
+  try {
+    interpret(statements1);
+  } catch (Exception e) {
+    interpret(statements2);
+  } finally {
+    interpret(statements3);
+  }
+  !!
+
+  // try handler (try/catch).
+  (* syntax:
+    try {
+      *statements*
+    } catch {
+      *statements*
+    }
+  *)
+| 'try' '{' statements!< '}' 'catch' '{' statements!< '}'
+  !!
+  try {
+    interpret(statements1);
+  } catch (Exception e) {
+    interpret(statements2);
+  }
+  !!
+
+  // while loop.
+  (* syntax: 
+    while (*condition*) {
+      *statements*
+    }
+  *)
+| 'while' '(' e0!< ')' '{' statements!< '}'
+  !! 
+  interpret(e01); 
+  if (e01.v instanceof Boolean) {
+    while ((Boolean) e01.v) {
+      interpret(statements1);
+      interpret(e01);
+    }
+  }
+  !! 
+
+  // for loop.
+  (* syntax: 
+    for (*statement*, *condition*, *increment*) {
+      *statements*
+    }
+  *)
+| 'for' '(' assignment!< ',' e0!< ',' assignment!< ')' '{' statements!< '}'
+  !! 
+  interpret(assignment1);
+  interpret(e01);
+  if (e01.v instanceof Boolean) {
+    while ((Boolean) e01.v) {
+      interpret(statements1);
+      interpret(assignment2);
+      interpret(e01);
+    }
+  } 
+  !! 
+
+// plugin handlers.
+  // operator.
+| 'plugin' '(' STRING_SQ ')' ';' !! plugin(STRING_SQ1.v); !!
+  // operator + 1 operand.
+| 'plugin' '(' STRING_SQ ',' e0 ')' ';' !! plugin(STRING_SQ1.v, e01.v); !!
+  // operator + 2 operands.
+| 'plugin' '(' STRING_SQ ',' e0 ',' e0 ')' ';' !! plugin(STRING_SQ1.v, e01.v, e02.v); !!
+
+| 'init' '()' ';' !! plugin("init"); !!
+| 'setOctave' '(' e0 ')' ';' !! if (e01.v instanceof Integer) {plugin("setOctave", (int) e01.v);} !!
+| 'setVelocity' '(' e0 ')' ';' !! if (e01.v instanceof Integer) {plugin("setVelocity", (int) e01.v);} !!
+| 'setBpm' '(' e0 ')' ';' !! if (e01.v instanceof Integer) {plugin("setBpm", (int) e01.v);} !!
+| 'setBeatRatio' '(' e0 ')' ';' !! if (e01.v instanceof Integer) {plugin("setBeatRatio", (int) e01.v);} !!
+| 'rest' '(' e0 ')' ';' !! if (e01.v instanceof Integer) {plugin("rest", (int) e01.v);} !!
+| 'playNote' '(' e0 ')' ';' !! if (e01.v instanceof String) {plugin("playNote", (String) e01.v);} !!
+| 'playList' '(' e0 ')' ';' 
+  !! 
+  if (e01.v instanceof ArrayList) { 
+    if(validateList(((ArrayList) e01.v), "asd")) {
+      plugin("playList", e01.v);
+    } 
+  } 
+  !!
+| 'playScale' '(' e0 ',' e0 ')' ';' !! if (e01.v instanceof String && e02.v instanceof String) {plugin("playScale", (String) e01.v, (String) e02.v);} !!
+| 'playChord' '(' e0 ',' e0 ')' ';' !! if (e01.v instanceof String && e02.v instanceof String) {plugin("playChord", (String) e01.v, (String) e02.v);} !!
+
+
+
+// assignment handler.
+assignment ::= ID '=' e0 !! variables.put(ID1.v, e01.v); !!   // syntax: *variable ID* = *value*;
+
+
+// function/procedure handler.
+func ::= 
+'function' ID '()' '{' statements!< 'return' ID ';' '}' !! procedures.put(ID1.v, statements1); functionReturns.put(ID1.v, ID2.v); !! // syntax: function *function ID* {*statements*};
+| 'procedure' ID '{' statements!< '}' !! procedures.put(ID1.v, statements1); !! // syntax: procedure *procedure ID* {*statements*};
+| 'call' ID ';' !! interpret(procedures.get(ID1.v)); !! // syntax: call *procedure ID*;
+
+
+// output handler. allows both print and println.
+output ::=
+  'println' '(' es0 ')' ';' !! System.out.println(es01.v); !!   // syntax: println(*value*);
+| 'print' '(' es0 ')' ';' !! System.out.print(es01.v); !!   // syntax: print(*value*);
+| 'printmap' '()' ';' !! System.out.println("Variable Map: " + variables); !!    // syntax: end;
+
+
+// list operators (i.e: add, remove).
+listops <a:ArrayList> ::= 
+  ID '.add' '(' e0 ')' ';'    // syntax: *list ID*.add(*value*);
+  !! 
+  listops.a = getList(ID1.v);
+
+  if (validateList(listops.a, e01.v)) {
+    listops.a.add(e01.v);
+  }
+  !!
+| ID '.addIndex' '(' e0 ',' e4 ')' ';'    // syntax: *list ID*.addIndex(*value*, *index*);
+  !! 
+  listops.a = getList(ID1.v);
+
+  if (validateList(listops.a, e01.v) && e41.v instanceof Integer) {
+    listops.a.add((int) e41.v, e01.v);
+  }
+  !!
+| ID '.addList' '(' ID ')' ';'    // syntax: *list ID*.addList(*list ID*);
+  !! 
+  listops.a = getList(ID1.v);
+  ArrayList temp = getList(ID2.v);
+  if (temp.size() > 0) {
+    if (validateList(listops.a, temp.get(0))) {
+      listops.a.addAll(temp);
+    }
+  }
+  !!
+| ID '.addList' '(' ID ',' e4 ')' ';'    // syntax: *list ID*.addList(*list ID*, *index*);
+  !! 
+  listops.a = getList(ID1.v);
+  ArrayList temp2 = getList(ID2.v);
+  if (temp2.size() > 0) {
+    if (validateList(listops.a, temp2.get(0)) && e41.v instanceof Integer) {
+      listops.a.addAll((int) e41.v, temp2);
+    }
+  }
+  !!
+| ID '.remove' '(' e0 ')' ';'   // syntax: *list ID*.remove(*value*);
+  !! 
+  listops.a = getList(ID1.v);
+
+  if (validateList(listops.a, e01.v)) {
+    listops.a.remove(e01.v);
+  }
+  !!
+| ID '.removeIndex' '(' e4 ')' ';'    // syntax: *list ID*.removeIndex(*index*);
+  !! 
+  listops.a = getList(ID1.v);
+
+  if (e41.v instanceof Integer) {
+    listops.a.remove((int) e41.v);
+  }
+  !!
+| ID '.clear' '()' ';'    // syntax: *list ID*.clear();
+  !! listops.a = getList(ID1.v); listops.a.clear(); !!
+| ID '.replace' '(' e0 ',' e4 ')' ';'    // syntax: *list ID*.replace(*value*, *index*);
+  !! 
+  listops.a = getList(ID1.v);
+
+  if (validateList(listops.a, e01.v) && e41.v instanceof Integer) {
+    listops.a.set((int) e41.v, e01.v);
+  }
+  !!
+
+
+// switch statements (with any number of cases).
+(* syntax:
+  switch (*expression*) {
+    case (*value*) {
+      *statements*
+    } default {
+      *statements*
+    }
+  }
+*)
+switchstmt <b:Boolean i:ART_C_statements j:ART_C_cases v:Object x:Object> ::=
+// switch handler.
+'switch' '(' e0 ')' '{' cases!< 'default' '{' statements!< '}' '}'    
+  !! 
+  // evaulate the expression.
+  switchstmt.b = false;
+  if (e01.v instanceof String) {switchstmt.v = (String) e01.v;}
+  else if (e01.v instanceof Integer) {switchstmt.v = (int) e01.v;}
+  else if (e01.v instanceof BigDecimal) {switchstmt.v = (BigDecimal) e01.v;}
+
+  // run the first case.
+  // save the evaluated condition and statement block of the first case, as well as the remaining case loop.
+  interpret(cases1);
+  ART_C_statements i = cases1.i;
+  ART_C_cases j = cases1.j;
+  Object v = cases1.v;
+
+  while (true) {
+
+    // check if the case is true.
+    if (switchstmt.v == v && !switchstmt.b) {
+      // run the code block of the true case.
+      interpret(i);
+      switchstmt.b = true;
+    }
+
+    // if there are no more cases, break.
+    if (j == null) {
+      break;
+    } else {
+      // run the next case in the case loop.
+      // save the evaluated condition and statement block of the first case, as well as the remaining case loop.
+      interpret(j);
+      i = j.i;
+      v = j.v;
+      j = j.j;
+    }
+  }
+
+  // if no cases are true, run default.
+  if (!switchstmt.b) {
+    interpret(statements1);
+  }
+  !!
+
+// case loop to allow case chaining.
+cases <i:ART_C_statements j:ART_C_cases v:Object> ::= case0 cases!<
+  // return: the evaluated condition and the statement block of the first case, as well as the remaining case loop.
+  !! cases.i = case01.i; cases.j = cases1; cases.v = case01.v; !!
+| case0 !! cases.i = case01.i; cases.v = case01.v; !!
+
+// case handler.
+case0 <v:Object i:ART_C_statements> ::= 'case' '(' e0 ')' '{' statements!< '}'
+  // return: the evaluated condition and the statement block of the case.
+  !! 
+  if (e01.v instanceof String) {case0.v = (String) e01.v;}
+  else if (e01.v instanceof Integer) {case0.v = (int) e01.v;}
+  else if (e01.v instanceof BigDecimal) {case0.v = (BigDecimal) e01.v;}
+  case0.i = statements1;
+  !!
+
+
+// if statements (with any number of elifs).
+(* syntax:
+  if (*expression*) {
+    *statements*
+  } elif (*expression*) {
+      *statements*
+  } else {
+      *statements*
+  }
+*)
+ifstmt ::= 
+  // if handler (if/elif/else).
+if0!< elseifs!< 'else' '{' statements!< '}'
+  !!
+  // run first if condition.
+  interpret(if01);
+  elseifs1.b = true;
+
+  // run elifs if the if statement evaluates to false.
+  if (!if01.b) {
+    interpret(elseifs1);
+  }
+  // run else statement if all other conditions evaluates to false.
+  if (!elseifs1.b) {
+    interpret(statements1);
+  }
+  !!
+  // if handler (if/elif).
+| if0!< elseifs!<
+  !!
+  interpret(if01);
+  elseifs1.b = true;
+  if (!if01.b) {
+    interpret(elseifs1);
+  }
+  !!
+  // if handler (if/else).
+| if0!< 'else' '{' statements!< '}'
+  !!
+  interpret(if01);
+  if (!if01.b) {
+    interpret(statements1);
+  }
+  !!
+  // if handler (if).
+| if0!< !! interpret(if01); !!
+
+// case loop to allow case chaining.
+elseifs <b:Boolean> ::= elseif elseifs!<
+  // only will run if all previous conditions are false.
+  !! 
+  elseifs.b = elseif1.b; 
+  if (!elseifs.b) {
+    interpret(elseifs1);
+    elseifs.b = elseifs1.b;
+  }
+  !!
+| elseif !! elseifs.b = elseif1.b; !!
+
+  // elif handler.
+elseif <b:Boolean> ::= 'elif' '(' e0 ')' '{' statements!< '}'
+  !! 
+  if (e01.v instanceof Boolean) {
+    elseif.b = (Boolean) e01.v;
+    if (elseif.b) {
+      interpret(statements1);
+    }
+  } 
+  !!
+
+  // if base case.
+if0 <b:Boolean> ::= 'if' '(' e0 ')' '{' statements!< '}'
+  !! 
+  if (e01.v instanceof Boolean) {
+    if0.b = (Boolean) e01.v;
+    if ((Boolean) e01.v) {
+      interpret(statements1);
+    }
+  } 
+  !!
+
+
+// expression handlers.
+// es0: convert a series of expressions to string form to output them.
+es0 <v:String> ::= 
+  e0 es0!< 
+  !! 
+  es0.v = convertToString(e01.v); 
+  interpret(es01);
+  es0.v = (es0.v).concat(convertToString(es01.v));
+  !!
+| e0 !! es0.v = convertToString(e01.v); !!
+
+
+// eo0: allow expression chaining with proper bracket support.
+eo0 <v:Object> ::=
+  e0 eo0 !! eo0.v = e01.v; !!
+| e0 !! eo0.v = e01.v; !!
+
+
+// e0: boolean algebra.
+e0 <v:Object> ::= 
+  // passthrough.
+  e1 !! e0.v = e11.v; !!
+| e1 'and' e1 !! e0.v = doAction(e11.v, e12.v, "and"); !!
+| e1 'or' e1 !! e0.v = doAction(e11.v, e12.v, "or"); !!
+| e1 'xor' e1 !! e0.v = doAction(e11.v, e12.v, "xor"); !!
+| 'not' e1 !! e0.v = doAction(e11.v, 0, "not"); !!
+
+
+// e1: relational operators.
+e1 <v:Object> ::= 
+  e2 !! e1.v = e21.v; !!
+| e2 '==' e2 !! e1.v = doAction(e21.v, e22.v, "=="); !!
+| e2 '!=' e2 !! e1.v = doAction(e21.v, e22.v, "!="); !!
+| e2 '>' e2 !! e1.v = doAction(e21.v, e22.v, ">"); !!
+| e2 '>=' e2 !! e1.v = doAction(e21.v, e22.v, ">="); !!
+| e2 '<' e2 !! e1.v = doAction(e21.v, e22.v, "<"); !!
+| e2 '<=' e2 !! e1.v = doAction(e21.v, e22.v, "<="); !!
+
+
+// e2: AS of BODMAS (and increment/decrement).
+e2 <v:Object> ::= 
+  e3 !! e2.v = e31.v; !!
+| e2 '+' e3 !! e2.v = doAction(e21.v, e31.v, "+"); !!
+| e2 '-' e3 !! e2.v = doAction(e21.v, e31.v, "-"); !!
+| e2 '++' !! e2.v = doAction(e21.v, 1, "+"); !!
+| e2 '--' !! e2.v = doAction(e21.v, 1, "-"); !!
+| e2 '.negate' '()' !! e2.v = doAction(e21.v, 0, "_"); !!
+
+
+// e3: ODM of BODMAS (and modulo).
+e3 <v:Object> ::= 
+  e4 !! e3.v = e41.v; !!
+| e3 '**' e4 !! e3.v = doAction(e31.v, e41.v, "**"); !!
+| e3 '/' e4 !! e3.v = doAction(e31.v, e41.v, "/"); !!
+| e3 '%' e4 !! e3.v = doAction(e31.v, e41.v, "%"); !!
+| e3 '*' e4 !! e3.v = doAction(e31.v, e41.v, "*"); !!
+
+
+// e4: handles datatypes and dereferencing.
+e4 <v:Object a:ArrayList> ::= 
+  // dereference.
+  ID !! e4.v = variables.get(ID1.v); !!
+
+  // literals.
+| LIST !! e4.v = LIST1.v; !!
+| STRING_SQ !! e4.v = STRING_SQ1.v; !!
+| INTEGER !! e4.v = INTEGER1.v; !!
+| DOUBLE !! e4.v = DOUBLE1.v; !!
+| BOOLEAN !! e4.v = BOOLEAN1.v; !!
+| '(' eo0 !! e4.v = eo01.v; !! ')'
+
+  // user input.
+| 'input' '(' es0 ')' !! System.out.println(es01.v); e4.v = scanner.nextLine(); !!
+
+  // list functions that need to be assignable.
+| ID '.get' '(' e4 ')'
+  !! 
+  e4.a = getList(ID1.v);
+  if (e41.v instanceof Integer) {
+    e4.v = (e4.a).get((int) e41.v);
+  }
+  !!
+| ID '.getIndex' '(' e4 ')'   // syntax: *list ID*.getIndex(*value*);
+  !! e4.a = getList(ID1.v); e4.v = (e4.a).indexOf(e41.v); !!
+| ID '.getLastIndex' '(' e4 ')'   // syntax: *list ID*.getLastIndex(*value*);
+  !! e4.a = getList(ID1.v); e4.v = (e4.a).lastIndexOf(e41.v); !!
+| ID '.size' '()'   // syntax: *list ID*.size();
+  !! e4.a = getList(ID1.v); e4.v = (e4.a).size(); !!
+| ID '.clone' '()'   // syntax: *list ID*.clone();
+  !! e4.a = getList(ID1.v); e4.v = e4.a.clone(); !!
+| ID '()' !! interpret(procedures.get(ID1.v)); e4.v = variables.get(functionReturns.get(ID1.v)); !! // syntax: *variable ID* = *function ID*();
+
+
+// Lexical rules
+LINE_COMMENT <v:String> ::= &COMMENT_LINE_C !! LINE_COMMENT.v = lexemeCore().translateEscapes(); !!
+BLOCK_COMMENT <v:String> ::= &COMMENT_BLOCK_C !! BLOCK_COMMENT.v = lexemeCore().translateEscapes(); !!
+ID <v:String> ::= &ID !! ID.v = lexeme(); !!
+LIST <v:ArrayList>  ::= '[]' !! LIST.v = new ArrayList<Object>(); !!
+STRING_SQ <v:String> ::= &STRING_SQ !! STRING_SQ.v = lexemeCore().translateEscapes(); !!
+INTEGER <v:Integer> ::= &INTEGER !! INTEGER.v = Integer.parseInt(lexeme()); !!
+DOUBLE <v:BigDecimal> ::= &REAL !! DOUBLE.v = new BigDecimal(lexeme()); !!
+BOOLEAN <v:Boolean> ::= 'true' !! BOOLEAN.v = Boolean.valueOf(true); !! 
+| 'false' !! BOOLEAN.v = Boolean.valueOf(false); !!

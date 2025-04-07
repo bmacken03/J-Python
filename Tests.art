@@ -1,0 +1,280 @@
+!try " // line comment test.
+
+/* block comment test. a = 0;
+The FitnessGram Pacer Test is a multistage aerobic capacity test
+that progressively gets more difficult as it continues. */
+
+println('arithmetic tests:');
+
+num = 1 + 2;
+num2 = 1.5 + 2.5;
+num3 = 1 + 2.5;
+println('int addition: ' num ', decimal addition: ' num2 ', int/decimal addition: ' num3 '.');
+
+num = 1 - 2;
+num2 = 1.5 - 2.5;
+num3 = 1 - 2.5;
+println('int subtraction: ' num ', decimal subtraction: ' num2 ', int/decimal subtraction: ' num3 '.');
+
+num = 1 * 2;
+num2 = 1.5 * 2.5;
+num3 = 1 * 2.5;
+println('int multiplication: ' num ', decimal multiplication: ' num2 ', int/decimal multiplication: ' num3 '.');
+
+num = 1 / 2;
+num2 = 1.5 / 2.5;
+num3 = 1 / 2.5;
+println('int division: ' num ', decimal division: ' num2 ', int/decimal division: ' num3 '.');
+
+num = 1 % 2;
+num2 = 1.5 % 2.5;
+num3 = 1 % 2.5;
+println('int modulo: ' num ', decimal modulo: ' num2 ', int/decimal modulo: ' num3 '.');
+
+// my language will default to 0 when dividing by 0.
+num = 1 / 0;
+num2 = 1.5 / 0;
+num3 = 1 / 0;
+println('int division by 0: ' num ', decimal division by 0: ' num2 ', int/decimal division by 0: ' num3 '.\n');"
+
+!try "println('test if variable map is cleared properly.'); printmap(); print('\n');"
+
+!try "println('comparison tests:');
+int1 = 6;
+int2 = 7;
+dec1 = 6.0;
+dec2 = 7.0;
+
+println(int1 ' == ' int2 ': ' int1 == int2);
+println(dec1 ' == ' dec2 ': ' dec1 == dec2);
+println(int1 ' == ' dec1 ': ' int1 == dec1);
+print('\n');
+println(int1 ' != ' int2 ': ' int1 != int2);
+println(dec1 ' != ' dec2 ': ' dec1 != dec2);
+println(int1 ' != ' dec1 ': ' int1 != dec1);
+print('\n');
+println(int1 ' > ' int2 ': ' int1 > int2);
+println(dec1 ' > ' dec2 ': ' dec1 > dec2);
+println(int1 ' > ' dec1 ': ' int1 > dec1);
+print('\n');
+println(int1 ' >= ' int2 ': ' int1 >= int2);
+println(dec1 ' >= ' dec2 ': ' dec1 >= dec2);
+println(int1 ' >= ' dec1 ': ' int1 >= dec1);
+print('\n');
+println(int1 ' < ' int2 ': ' int1 < int2);
+println(dec1 ' < ' dec2 ': ' dec1 < dec2);
+println(int1 ' < ' dec1 ': ' int1 < dec1);
+print('\n');
+println(int1 ' <= ' int2 ': ' int1 <= int2);
+println(dec1 ' <= ' dec2 ': ' dec1 <= dec2);
+println(int1 ' <= ' dec1 ': ' int1 <= dec1);
+print('\n');"
+
+!try "println('boolean logic tests:');
+bool1 = true;
+bool2 = false;
+
+println(bool1 ' and ' bool1 ': ' bool1 and bool1);
+println(bool1 ' and ' bool2 ': ' bool1 and bool2);
+println(bool2 ' and ' bool2 ': ' bool2 and bool2);
+print('\n');
+println(bool1 ' or ' bool1 ': ' bool1 or bool1);
+println(bool1 ' or ' bool2 ': ' bool1 or bool2);
+println(bool2 ' or ' bool2 ': ' bool2 or bool2);
+print('\n');
+println(bool1 ' xor ' bool1 ': ' bool1 xor bool1);
+println(bool1 ' xor ' bool2 ': ' bool1 xor bool2);
+println(bool2 ' xor ' bool2 ': ' bool2 xor bool2);
+print('\n');
+println('not ' bool1 ': ' not bool1);
+println('not ' bool2 ': ' not bool2);
+print('\n');"
+
+!try "println('if statement tests:');
+
+println('test 1:');
+if (10 > 5) {
+  println('if clause.');
+} elif (10 > 5) {
+  println('elif clause 1.');
+} elif (0 > 5) {
+  println('elif clause 2.');
+} else {
+  println('else clause.');
+}
+
+println('\ntest 2:');
+if (0 > 5) {
+  println('if clause.');
+} elif (10 > 5) {
+  println('elif clause 1.');
+} elif (0 > 5) {
+  println('elif clause 2.');
+} else {
+  println('else clause.');
+}
+
+println('\ntest 3:');
+if (0 > 5) {
+  println('if clause.');
+} elif (0 > 5) {
+  println('elif clause 1.');
+} elif (10 > 5) {
+  println('elif clause 2.');
+} else {
+  println('else clause.');
+}
+
+println('\ntest 4:');
+if (0 > 5) {
+  println('if clause.');
+} elif (0 > 5) {
+  println('elif clause 1.');
+} elif (0 > 5) {
+  println('elif clause 2.');
+} else {
+  println('else clause.');
+}
+print('\n');"
+
+!try "println('switch statement tests:');
+i = 10;
+
+println('test 1:');
+switch (i) {
+  case (10) {
+    println('case 10.');
+  } case (20) {
+    println('case 20.');
+  } default {
+    println('i is not 10 or 20.');
+  }
+}
+
+i = 20;
+
+println('test 2:');
+switch (i) {
+  case (10) {
+    println('case 10.');
+  } case (20) {
+    println('case 20.');
+  } default {
+    println('i is not 10 or 20.');
+  }
+}
+
+i = 30;
+
+println('test 3:');
+switch (i) {
+  case (10) {
+    println('case 10.');
+  } case (20) {
+    println('case 20.');
+  } default {
+    println('i is not 10 or 20.');
+  }
+}
+print('\n');"
+
+!try "println('while loop test:');
+i = 1;
+bool = true;
+
+while(i < 6) {
+  print(i ', ');
+  i = i + 1;
+}
+
+while(bool) {
+  if (i > 10) {
+    bool = false;
+  } else {
+    print(i ', ');
+    i = i + 1;
+  }
+}
+print('\n\n');"
+
+!try "println('for loop test:');
+for (i = 1, i < 11, i = i++) {
+  print(i ', ');
+}
+print('\n\n');"
+
+!try "println('list tests:');
+a = [];
+
+for (i = 1, i < 11, i = i++) {
+  a.add(i);
+}
+println('list a contains: ' a);
+
+a.addIndex(10, 0);
+a.addIndex('asd', 0);
+println('list a contains: ' a);
+
+println('first occurance of 10 is ' a.getIndex(10));
+println('last occurance of 10 is ' a.getLastIndex(10));
+println('item at index 5 is: ' a.get(5));
+
+b = a.clone();
+b.remove(10);
+b.removeIndex(5);
+a.clear();
+
+println('list a contains: ' a);
+println('list b contains: ' b);
+print('\n');"
+
+!try "println('try/catch test:');
+try {
+  a = 10;
+  a.add(23);
+} catch {
+  println('something went wrong.');
+} 
+print('\n');"
+
+!try "println('input test:');
+name = input('enter your name: ');
+println('Hello ' name);
+print('\n');"
+
+!try "println('plugin methods test:');
+
+// set test note.
+note = 'C';
+
+// create lists of custom chords (e.g: gsus4).
+gsus4 = [];
+gsus4.add('G#');
+gsus4.add('C#');
+gsus4.add('D#');
+
+// initialise.
+init();
+
+// can set velocity (setVelocity), octave (setOctave), bpm (setBpm), beat ratio (setBeatRatio).
+setVelocity(60);
+
+// play individual note.
+playNote(note);
+rest(1);
+
+// play common chords (M, m, M7, m7).
+playChord(note, 'major');
+rest(1);
+playChord(note, 'minor');
+rest(1);
+playChord(note, 'major7');
+rest(1);
+playChord(note, 'minor7');
+rest(1);
+
+// play scale and custom chord from list.
+playScale(note, 'm');
+rest(1);
+playList(gsus4);
+rest(1);"

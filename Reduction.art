@@ -1,0 +1,411 @@
+(* Reduction.art - project starter *)
+!trace 2
+!configuration -> _sig:__map, _alpha:__list
+
+(* Term rewrite rules *)
+
+-output _E,_sig,_alpha -> _EP,_sigP,_alphaP --- output(_E),_sig,_alpha -> __done,_sigP, __put(_alphaP,0,_EP)
+
+-assign  _n |> __bool(_)   --- assign(_X,_n),_sig,_alpha -> __done,__put(_sig,_X,_n),_alpha
+-assign  _n |> __char(_)   --- assign(_X,_n),_sig,_alpha -> __done,__put(_sig,_X,_n),_alpha
+-assign  _n |> __int32(_)  --- assign(_X,_n),_sig,_alpha -> __done,__put(_sig,_X,_n),_alpha
+-assign  _n |> __real64(_) --- assign(_X,_n),_sig,_alpha -> __done,__put(_sig,_X,_n),_alpha
+-assign  _n |> __string(_) --- assign(_X,_n),_sig,_alpha -> __done,__put(_sig,_X,_n),_alpha
+-assign  _n |> __list   --- assign(_X,_n),_sig,_alpha -> __done,__put(_sig,_X,_n),_alpha
+-assignR _E,_sig,_alpha -> _I,_sigP,_alphaP --- assign(_X,_E),_sig,_alpha -> assign(_X,_I),_sigP,_alphaP
+
+-deref --- deref(_R),_sig,_alpha -> __get(_sig,_R),_sig,_alpha
+
+-sequenceDone                                   --- seq(__done, _C),_sig,_alpha -> _C,_sig,_alpha
+-sequence _C1,_sig,_alpha -> _C1P,_sigP,_alphaP --- seq(_C1,_C2),_sig,_alpha -> seq(_C1P,_C2),_sigP,_alphaP
+
+
+-ifTrue                                       --- if(true,_C1),_sig,_alpha -> _C1,_sig,_alpha
+-ifFalse                                      --- if(false,_C1),_sig,_alpha -> __done,_sig,_alpha
+-ifResolve _E,_sig,_alpha ->_EP,_sigP,_alphaP --- if(_E,_C1),_sig,_alpha -> if(_EP,_C1),_sigP,_alphaP
+
+-ifTrue                                       --- if(true,_C1,_C2),_sig,_alpha -> _C1,_sig,_alpha
+-ifFalse                                      --- if(false,_C1,_C2),_sig,_alpha -> _C2,_sig,_alpha
+-ifResolve _E,_sig,_alpha ->_EP,_sigP,_alphaP --- if(_E,_C1,_C2),_sig,_alpha -> if(_EP,_C1,_C2),_sigP,_alphaP
+
+-while --- while(_E,_C),_sig,_alpha -> if(_E,seq(_C,while(_E,_C)),__done),_sig,_alpha
+
+-for --- for(_E,_I,_C),_sig,_alpha -> if(_E,seq(seq(_C,_I), for(_E,_I,_C)),__done),_sig,_alpha
+
+-eq  _n1 |> __bool(_) _n2 |> __bool(_)                         --- eq(_n1,_n2),_sig,_alpha  -> __eq(_n1,_n2),_sig,_alpha
+-eqR _n |> __bool(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP     --- eq(_n,_E2) ,_sig,_alpha  -> eq(_n,_I2),_sigP,_alphaP
+-eq  _n1 |> __char(_) _n2 |> __char(_)                         --- eq(_n1,_n2),_sig,_alpha  -> __eq(_n1,_n2),_sig,_alpha
+-eqR _n |> __char(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP     --- eq(_n,_E2) ,_sig,_alpha  -> eq(_n,_I2),_sigP,_alphaP
+-eq  _n1 |> __int32(_) _n2 |> __int32(_)                       --- eq(_n1,_n2),_sig,_alpha  -> __eq(_n1,_n2),_sig,_alpha
+-eqR _n |> __int32(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP    --- eq(_n,_E2) ,_sig,_alpha  -> eq(_n,_I2),_sigP,_alphaP
+-eq  _n1 |> __real64(_) _n2 |> __real64(_)                     --- eq(_n1,_n2),_sig,_alpha  -> __eq(_n1,_n2),_sig,_alpha
+-eqR _n |> __real64(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP   --- eq(_n,_E2) ,_sig,_alpha  -> eq(_n,_I2),_sigP,_alphaP
+-eq  _n1 |> __string(_) _n2 |> __string(_)                     --- eq(_n1,_n2),_sig,_alpha  -> __eq(_n1,_n2),_sig,_alpha
+-eqR _n |> __string(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP   --- eq(_n,_E2) ,_sig,_alpha  -> eq(_n,_I2),_sigP,_alphaP
+-eqL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                      --- eq(_E1,_E2),_sig,_alpha  -> eq(_I1,_E2),_sigP,_alphaP
+
+-ne  _n1 |> __bool(_) _n2 |> __bool(_)                         --- ne(_n1,_n2),_sig,_alpha  -> __ne(_n1,_n2),_sig,_alpha
+-neR _n |> __bool(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP     --- ne(_n,_E2) ,_sig,_alpha  -> ne(_n,_I2),_sigP,_alphaP
+-ne  _n1 |> __char(_) _n2 |> __char(_)                         --- ne(_n1,_n2),_sig,_alpha  -> __ne(_n1,_n2),_sig,_alpha
+-neR _n |> __char(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP     --- ne(_n,_E2) ,_sig,_alpha  -> ne(_n,_I2),_sigP,_alphaP
+-ne  _n1 |> __int32(_) _n2 |> __int32(_)                       --- ne(_n1,_n2),_sig,_alpha  -> __ne(_n1,_n2),_sig,_alpha
+-neR _n |> __int32(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP    --- ne(_n,_E2) ,_sig,_alpha  -> ne(_n,_I2),_sigP,_alphaP
+-ne  _n1 |> __real64(_) _n2 |> __real64(_)                     --- ne(_n1,_n2),_sig,_alpha  -> __ne(_n1,_n2),_sig,_alpha
+-neR _n |> __real64(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP   --- ne(_n,_E2) ,_sig,_alpha  -> ne(_n,_I2),_sigP,_alphaP
+-ne  _n1 |> __string(_)  _n2 |> __string(_)                    --- ne(_n1,_n2),_sig,_alpha  -> __ne(_n1,_n2),_sig,_alpha
+-neR _n |> __string(_)   _E2,_sig,_alpha -> _I2,_sigP,_alphaP  --- ne(_n,_E2) ,_sig,_alpha  -> ne(_n,_I2),_sigP,_alphaP
+-neL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                      --- ne(_E1,_E2),_sig,_alpha  -> ne(_I1,_E2),_sigP,_alphaP
+
+-gt  _n1 |> __char(_)  _n2 |> __char(_)                        --- gt(_n1,_n2),_sig,_alpha  ->  __gt(_n1,_n2),_sig,_alpha 
+-gtR _n |> __char(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP     --- gt(_n,_E2),_sig,_alpha   -> gt(_n,_I2),_sigP,_alphaP
+-gt  _n1 |> __int32(_)  _n2 |> __int32(_)                      --- gt(_n1,_n2),_sig,_alpha  ->  __gt(_n1,_n2),_sig,_alpha 
+-gtR _n |> __int32(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP    --- gt(_n,_E2),_sig,_alpha   -> gt(_n,_I2),_sigP,_alphaP
+-gt  _n1 |> __real64(_)  _n2 |> __real64(_)                    --- gt(_n1,_n2),_sig,_alpha  ->  __gt(_n1,_n2),_sig,_alpha 
+-gtR _n |> __real64(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP   --- gt(_n,_E2),_sig,_alpha   -> gt(_n,_I2),_sigP,_alphaP
+-gt  _n1 |> __string(_)  _n2 |> __string(_)                    --- gt(_n1,_n2),_sig,_alpha  ->  __gt(_n1,_n2),_sig,_alpha 
+-gtR _n |> __string(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP   --- gt(_n,_E2),_sig,_alpha   -> gt(_n,_I2),_sigP,_alphaP
+-gtL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                      --- gt(_E1,_E2),_sig,_alpha  -> gt(_I1,_E2),_sigP,_alphaP
+
+-lt  _n1 |> __char(_)  _n2 |> __char(_)                        --- lt(_n1,_n2),_sig,_alpha  ->  __lt(_n1,_n2),_sig,_alpha 
+-ltR _n |> __char(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP     --- lt(_n,_E2),_sig,_alpha   -> lt(_n,_I2),_sigP,_alphaP
+-lt  _n1 |> __int32(_)  _n2 |> __int32(_)                      --- lt(_n1,_n2),_sig,_alpha  ->  __lt(_n1,_n2),_sig,_alpha 
+-ltR _n |> __int32(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP    --- lt(_n,_E2),_sig,_alpha   -> lt(_n,_I2),_sigP,_alphaP
+-lt  _n1 |> __real64(_)  _n2 |> __real64(_)                    --- lt(_n1,_n2),_sig,_alpha  ->  __lt(_n1,_n2),_sig,_alpha 
+-ltR _n |> __real64(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP   --- lt(_n,_E2),_sig,_alpha   -> lt(_n,_I2),_sigP,_alphaP
+-lt  _n1 |> __string(_)  _n2 |> __string(_)                    --- lt(_n1,_n2),_sig,_alpha  ->  __lt(_n1,_n2),_sig,_alpha 
+-ltR _n |> __string(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP   --- lt(_n,_E2),_sig,_alpha   -> lt(_n,_I2),_sigP,_alphaP
+-ltL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                      --- lt(_E1,_E2),_sig,_alpha  -> lt(_I1,_E2),_sigP,_alphaP
+
+-ge  _n1 |> __char(_)  _n2 |> __char(_)                        --- ge(_n1,_n2),_sig,_alpha  ->  __ge(_n1,_n2),_sig,_alpha 
+-geR _n |> __char(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP     --- ge(_n,_E2),_sig,_alpha   -> ge(_n,_I2),_sigP,_alphaP
+-ge  _n1 |> __int32(_)  _n2 |> __int32(_)                      --- ge(_n1,_n2),_sig,_alpha  ->  __ge(_n1,_n2),_sig,_alpha 
+-geR _n |> __int32(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP    --- ge(_n,_E2),_sig,_alpha   -> ge(_n,_I2),_sigP,_alphaP
+-ge  _n1 |> __real64(_)  _n2 |> __real64(_)                    --- ge(_n1,_n2),_sig,_alpha  ->  __ge(_n1,_n2),_sig,_alpha 
+-geR _n |> __real64(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP   --- ge(_n,_E2),_sig,_alpha   -> ge(_n,_I2),_sigP,_alphaP
+-ge  _n1 |> __string(_)  _n2 |> __string(_)                    --- ge(_n1,_n2),_sig,_alpha  ->  __ge(_n1,_n2),_sig,_alpha 
+-geR _n |> __string(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP   --- ge(_n,_E2),_sig,_alpha   -> ge(_n,_I2),_sigP,_alphaP
+-geL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                      --- ge(_E1,_E2),_sig,_alpha  -> ge(_I1,_E2),_sigP,_alphaP
+
+-le  _n1 |> __char(_)  _n2 |> __char(_)                        --- le(_n1,_n2),_sig,_alpha  ->  __le(_n1,_n2),_sig,_alpha 
+-leR _n |> __char(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP     --- le(_n,_E2),_sig,_alpha   -> le(_n,_I2),_sigP,_alphaP
+-le  _n1 |> __int32(_)  _n2 |> __int32(_)                      --- le(_n1,_n2),_sig,_alpha  ->  __le(_n1,_n2),_sig,_alpha 
+-leR _n |> __int32(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP    --- le(_n,_E2),_sig,_alpha   -> le(_n,_I2),_sigP,_alphaP
+-le  _n1 |> __real64(_)  _n2 |> __real64(_)                    --- le(_n1,_n2),_sig,_alpha  ->  __le(_n1,_n2),_sig,_alpha 
+-leR _n |> __real64(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP   --- le(_n,_E2),_sig,_alpha   -> le(_n,_I2),_sigP,_alphaP
+-le  _n1 |> __string(_)  _n2 |> __string(_)                    --- le(_n1,_n2),_sig,_alpha  ->  __le(_n1,_n2),_sig,_alpha 
+-leR _n |> __string(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP   --- le(_n,_E2),_sig,_alpha   -> le(_n,_I2),_sigP,_alphaP
+-leL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                      --- le(_E1,_E2),_sig,_alpha  -> le(_I1,_E2),_sigP,_alphaP
+
+-comp  _n1 |> __char(_)  _n2 |> __char(_)                      --- comp(_n1,_n2),_sig,_alpha  ->  __comp(_n1,_n2),_sig,_alpha 
+-compR _n |> __char(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP   --- comp(_n,_E2),_sig,_alpha   -> comp(_n,_I2),_sigP,_alphaP
+-comp  _n1 |> __int32(_)  _n2 |> __int32(_)                    --- comp(_n1,_n2),_sig,_alpha  ->  __comp(_n1,_n2),_sig,_alpha 
+-compR _n |> __int32(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP  --- comp(_n,_E2),_sig,_alpha   -> comp(_n,_I2),_sigP,_alphaP
+-comp  _n1 |> __real64(_)  _n2 |> __real64(_)                  --- comp(_n1,_n2),_sig,_alpha  ->  __comp(_n1,_n2),_sig,_alpha 
+-compR _n |> __real64(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP --- comp(_n,_E2),_sig,_alpha   -> comp(_n,_I2),_sigP,_alphaP
+-comp  _n1 |> __string(_)  _n2 |> __string(_)                  --- comp(_n1,_n2),_sig,_alpha  ->  __comp(_n1,_n2),_sig,_alpha 
+-compR _n |> __string(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP --- comp(_n,_E2),_sig,_alpha   -> comp(_n,_I2),_sigP,_alphaP
+-compL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                    --- comp(_E1,_E2),_sig,_alpha  -> comp(_I1,_E2),_sigP,_alphaP
+
+-not  _n |> __bool(_)                                        --- not(_n),_sig,_alpha -> __not(_n),_sig,_alpha
+-not  _n |> __int32(_)                                       --- not(_n),_sig,_alpha -> __not(_n),_sig,_alpha
+-notI _E1,_sig,_alpha -> _I1,_sigP,_alphaP                   --- not(_E1),_sig,_alpha  -> not(_I1),_sigP,_alphaP
+
+-and  _n1 |> __bool(_) _n2 |> __bool(_)                      --- and(_n1,_n2),_sig,_alpha  -> __and(_n1,_n2),_sig,_alpha
+-andR _n |> __bool(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP  --- and(_n,_E2) ,_sig,_alpha  -> and(_n,_I2),_sigP,_alphaP
+-and  _n1 |> __int32(_) _n2 |> __int32(_)                    --- and(_n1,_n2),_sig,_alpha  -> __and(_n1,_n2),_sig,_alpha
+-andR _n |> __int32(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP --- and(_n,_E2) ,_sig,_alpha  -> and(_n,_I2),_sigP,_alphaP
+-andL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                   --- and(_E1,_E2),_sig,_alpha  -> and(_I1,_E2),_sigP,_alphaP
+
+-or  _n1 |> __bool(_) _n2 |> __bool(_)                       --- or(_n1,_n2),_sig,_alpha  -> __or(_n1,_n2),_sig,_alpha
+-orR _n |> __bool(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP   --- or(_n,_E2) ,_sig,_alpha  -> or(_n,_I2),_sigP,_alphaP
+-or  _n1 |> __int32(_) _n2 |> __int32(_)                     --- or(_n1,_n2),_sig,_alpha  -> __or(_n1,_n2),_sig,_alpha
+-orR _n |> __int32(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP  --- or(_n,_E2) ,_sig,_alpha  -> or(_n,_I2),_sigP,_alphaP
+-orL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                    --- or(_E1,_E2),_sig,_alpha  -> or(_I1,_E2),_sigP,_alphaP
+
+-xor  _n1 |> __bool(_) _n2 |> __bool(_)                      --- xor(_n1,_n2),_sig,_alpha  -> __xor(_n1,_n2),_sig,_alpha
+-xorR _n |> __bool(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP  --- xor(_n,_E2) ,_sig,_alpha  -> xor(_n,_I2),_sigP,_alphaP
+-xor  _n1 |> __int32(_) _n2 |> __int32(_)                    --- xor(_n1,_n2),_sig,_alpha  -> __xor(_n1,_n2),_sig,_alpha
+-xorR _n |> __int32(_)  _E2,_sig,_alpha -> _I2,_sigP,_alphaP --- xor(_n,_E2) ,_sig,_alpha  -> xor(_n,_I2),_sigP,_alphaP
+-xorL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                   --- xor(_E1,_E2),_sig,_alpha  -> xor(_I1,_E2),_sigP,_alphaP
+
+-neg  _n |> __int32(_)                                       --- neg(_n),_sig,_alpha -> __neg(_n),_sig,_alpha
+-neg  _n |> __real64(_)                                      --- neg(_n),_sig,_alpha -> __neg(_n),_sig,_alpha
+-negI _E1,_sig,_alpha -> _I1,_sigP,_alphaP                   --- neg(_E1),_sig,_alpha  -> neg(_I1),_sigP,_alphaP
+
+-add  _n1 |> __int32(_) _n2 |> __int32(_)                    --- add(_n1,_n2),_sig,_alpha -> __add(_n1,_n2),_sig,_alpha
+-addR _n |> __int32(_) _E2,_sig,_alpha -> _I2,_sigP,_alphaP  --- add(_n,_E2),_sig,_alpha  -> add(_n,_I2),_sigP,_alphaP
+-add  _n1 |> __real64(_) _n2 |> __real64(_)                  --- add(_n1,_n2),_sig,_alpha -> __add(_n1,_n2),_sig,_alpha
+-addR _n |> __real64(_) _E2,_sig,_alpha -> _I2,_sigP,_alphaP --- add(_n,_E2),_sig,_alpha  -> add(_n,_I2),_sigP,_alphaP
+-addL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                   --- add(_E1,_E2),_sig,_alpha -> add(_I1,_E2),_sigP,_alphaP
+
+-sub  _n1 |> __int32(_) _n2 |> __int32(_)                    --- sub(_n1,_n2),_sig,_alpha -> __sub(_n1,_n2),_sig,_alpha
+-subR _n |> __int32(_) _E2,_sig,_alpha -> _I2,_sigP,_alphaP  --- sub(_n,_E2),_sig,_alpha  -> sub(_n,_I2),_sigP,_alphaP
+-sub  _n1 |> __real64(_) _n2 |> __real64(_)                  --- sub(_n1,_n2),_sig,_alpha -> __sub(_n1,_n2),_sig,_alpha
+-subR _n |> __real64(_) _E2,_sig,_alpha -> _I2,_sigP,_alphaP --- sub(_n,_E2),_sig,_alpha  -> sub(_n,_I2),_sigP,_alphaP
+-subL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                   --- sub(_E1,_E2),_sig,_alpha -> sub(_I1,_E2),_sigP,_alphaP
+
+-mul  _n1 |> __int32(_) _n2 |> __int32(_)                    --- mul(_n1,_n2),_sig,_alpha -> __mul(_n1,_n2),_sig,_alpha
+-mulR _n |> __int32(_) _E2,_sig,_alpha -> _I2,_sigP,_alphaP  --- mul(_n,_E2),_sig,_alpha  -> mul(_n,_I2),_sigP,_alphaP
+-mul  _n1 |> __real64(_) _n2 |> __real64(_)                  --- mul(_n1,_n2),_sig,_alpha -> __mul(_n1,_n2),_sig,_alpha
+-mulR _n |> __real64(_) _E2,_sig,_alpha -> _I2,_sigP,_alphaP --- mul(_n,_E2),_sig,_alpha  -> mul(_n,_I2),_sigP,_alphaP
+-mulL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                   --- mul(_E1,_E2),_sig,_alpha -> mul(_I1,_E2),_sigP,_alphaP
+
+-div  _n1 |> __int32(_) _n2 |> __int32(_)                    --- div(_n1,_n2),_sig,_alpha -> __div(_n1,_n2),_sig,_alpha
+-divR _n |> __int32(_) _E2,_sig,_alpha -> _I2,_sigP,_alphaP  --- div(_n,_E2),_sig,_alpha  -> div(_n,_I2),_sigP,_alphaP
+-div  _n1 |> __real64(_) _n2 |> __real64(_)                  --- div(_n1,_n2),_sig,_alpha -> __div(_n1,_n2),_sig,_alpha
+-divR _n |> __real64(_) _E2,_sig,_alpha -> _I2,_sigP,_alphaP --- div(_n,_E2),_sig,_alpha  -> div(_n,_I2),_sigP,_alphaP
+-divL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                   --- div(_E1,_E2),_sig,_alpha -> div(_I1,_E2),_sigP,_alphaP
+
+-mod  _n1 |> __int32(_) _n2 |> __int32(_)                    --- mod(_n1,_n2),_sig,_alpha -> __mod(_n1,_n2),_sig,_alpha
+-modR _n |> __int32(_) _E2,_sig,_alpha -> _I2,_sigP,_alphaP  --- mod(_n,_E2),_sig,_alpha  -> mod(_n,_I2),_sigP,_alphaP
+-mod  _n1 |> __real64(_) _n2 |> __real64(_)                  --- mod(_n1,_n2),_sig,_alpha -> __mod(_n1,_n2),_sig,_alpha
+-modR _n |> __real64(_) _E2,_sig,_alpha -> _I2,_sigP,_alphaP --- mod(_n,_E2),_sig,_alpha  -> mod(_n,_I2),_sigP,_alphaP
+-modL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                   --- mod(_E1,_E2),_sig,_alpha -> mod(_I1,_E2),_sigP,_alphaP
+
+-exp  _n1 |> __int32(_) _n2 |> __int32(_)                    --- exp(_n1,_n2),_sig,_alpha -> __exp(_n1,_n2),_sig,_alpha
+-expR _n |> __int32(_) _E2,_sig,_alpha -> _I2,_sigP,_alphaP  --- exp(_n,_E2),_sig,_alpha  -> exp(_n,_I2),_sigP,_alphaP
+-exp  _n1 |> __real64(_) _n2 |> __real64(_)                  --- exp(_n1,_n2),_sig,_alpha -> __exp(_n1,_n2),_sig,_alpha
+-expR _n |> __real64(_) _E2,_sig,_alpha -> _I2,_sigP,_alphaP --- exp(_n,_E2),_sig,_alpha  -> exp(_n,_I2),_sigP,_alphaP
+-expL _E1,_sig,_alpha -> _I1,_sigP,_alphaP                   --- exp(_E1,_E2),_sig,_alpha -> exp(_I1,_E2),_sigP,_alphaP
+
+-inc  _n |> __int32(_)                     --- inc(_n),_sig,_alpha -> __add(_n, 1),_sig,_alpha
+-inc  _n |> __real64(_)                    --- inc(_n),_sig,_alpha -> __add(_n, 1.00),_sig,_alpha
+-incI _E1,_sig,_alpha -> _I1,_sigP,_alphaP --- inc(_E1),_sig,_alpha  -> inc(_I1),_sigP,_alphaP
+
+-dec  _n |> __int32(_)                     --- dec(_n),_sig,_alpha -> __sub(_n, 1),_sig,_alpha
+-dec  _n |> __real64(_)                    --- dec(_n),_sig,_alpha -> __sub(_n, 1.00),_sig,_alpha
+-decI _E1,_sig,_alpha -> _I1,_sigP,_alphaP --- dec(_E1),_sig,_alpha  -> dec(_I1),_sigP,_alphaP
+
+-plugin --- plugin(_O),_sig,_alpha -> __plugin(_O),_sig,_alpha
+-plugin --- plugin(_O,_X),_sig,_alpha -> __plugin(_O,_X),_sig,_alpha
+-plugin --- plugin(_O,_X,_Y),_sig,_alpha -> __plugin(_O,_X,_Y),_sig,_alpha
+-plugin --- plugin(_O,_X,_Y,_Z),_sig,_alpha -> __plugin(_O,_X,_Y,_Z),_sig,_alpha
+
+-playNote  --- playNote(_A),_sig,_alpha -> __plugin("playNote",_A),_sig,_alpha
+-playNote  --- playNote(_A,_B),_sig,_alpha -> __plugin("playNote",_A,_B),_sig,_alpha
+-playNote  --- playNote(_A,_B,_C),_sig,_alpha -> __plugin("playNote",_A,_B,_C),_sig,_alpha
+-playChord --- playChord(_A),_sig,_alpha -> __plugin("playChord",_A),_sig,_alpha
+-playChord --- playChord(_A,_B),_sig,_alpha -> __plugin("playChord",_A,_B),_sig,_alpha
+-playChord --- playChord(_A,_B,_C),_sig,_alpha -> __plugin("playChord",_A,_B,_C),_sig,_alpha
+
+(*  CFG rules *)
+seq ::= statement^^ | statement seq 
+statement ::= assign^^ | while^^ | for^^ | if^^ | plugin^^ | playChord^^ | playNote^^ | output^^
+assign ::= &ID '='^ expressions
+output ::= 'print'^ '('^ expressions ')'^
+while ::= 'while'^ '('^ expressions ')'^ '{'^ statement '}'^
+for ::= 'for'^ '('^ expression ','^ statement ')'^ '{'^ statement '}'^
+if ::= 'if'^ '('^ expressions ')'^ '{'^ statement '}'^ | 'if'^ '('^ expressions ')'^ '{'^ statement '}'^ 'else'^ '{'^ statement '}'^
+plugin ::= 'plugin'^ '('^ expressions ')'^  
+playChord ::= 'playChord'^ '('^ __string ')'^ | 'playChord'^ '('^ __string ','^ __string ')'^ | 'playChord'^ '('^ __string ','^ __string ','^ __string ')'^
+playNote ::= 'playNote'^ '('^ __string ')'^ | 'playNote'^ '('^ __string ','^ __string ')'^ | 'playNote'^ '('^ __string ','^ __string ','^ __string ')'^
+expressions ::=  expression^^  | expression ','^ expressions^ | not^^ | and^^ | or^^ | xor^^
+  not ::= 'not'^ '('^ expression ')'^
+  and ::= expression 'and'^ expression
+  or  ::= expression 'or'^ expression
+  xor ::= expression 'xor'^ expression
+expression ::= rels^^ | not^^ | and^^ | or^^ | xor^^
+  not ::= 'not'^ '('^ rels ')'^
+  and ::= rels 'and'^ rels
+  or  ::= rels 'or'^ rels
+  xor ::= rels 'xor'^ rels
+rels ::= adds^^ | eq^^ | ne^^ | gt^^ | lt^^ | ge^^ | le^^ | comp^^
+  eq ::= adds '=='^ adds
+  ne ::= adds '!='^ adds 
+  gt ::= adds '>'^ adds
+  lt ::= adds '<'^ adds
+  ge ::= adds '>='^ adds
+  le ::= adds '<='^ adds
+  comp ::= adds '==='^ adds
+adds  ::= operand^^ | neg^^ | add^^ | sub^^ | mul^^ | div^^ | mod^^ | exp^^ | inc^^ | dec^^ | __list^^
+  neg ::= '-'^ operand
+  add ::= adds '+'^ operand
+  sub ::= adds '-'^ operand
+  mul ::= adds '*'^ operand
+  div ::= adds '/'^ operand
+  mod ::= adds '%'^ operand
+  exp ::= adds '^'^ operand
+  inc ::= operand '++'^
+  dec ::= operand '--'^
+  __list ::= '[]'^
+operand ::= __bool^^ | __char^^ | __int32^^ | __real64^^ | __string^^ | deref^^ | plugin^^
+  __bool ::= 'true' | 'false'
+  __char ::= &CHAR_BQ
+  __int32 ::= &INTEGER
+  __real64 ::= &REAL
+  __string ::= &STRING_SQ
+  deref ::= &ID
+
+(* Plugin Tests *)
+!try "plugin('init')"
+!try "playNote('D')"
+!try "playNote('D', 'G')"
+!try "playNote('D', 'G', 'C')"
+!try "playChord('D')"
+!try "playChord('D', 'G')"
+!try "playChord('D', 'G', 'C')"
+
+
+(* Feature Tests *)
+!try eq(3,4), __map, __list = false, __map, __list
+!try eq(add(2,2),add(2,2)), __map, __list = true, __map, __list
+
+!try ne(3,3), __map, __list = false, __map, __list
+!try ne(sub(5,2),sub(3,4)), __map, __list = true, __map, __list
+
+!try gt(3,4), __map, __list = false, __map, __list
+!try gt(add(4,3),add(1,2)), __map, __list = true, __map, __list
+
+!try lt(5,2), __map, __list = false, __map, __list
+!try lt(add(4,1),add(4,3)), __map, __list = true, __map, __list
+
+!try ge(3,4), __map, __list = false, __map, __list
+!try ge(add(4,3),add(1,2)), __map, __list = true, __map, __list
+
+!try le(5,2), __map, __list = false, __map, __list
+!try le(add(4,1),add(4,3)), __map, __list = true, __map, __list
+
+!try comp(3,4), __map, __list = -1, __map, __list
+!try comp(4,4), __map, __list = 0, __map, __list
+!try comp(5,4), __map, __list = 1, __map, __list
+
+!try add(3,4), __map, __list = 7, __map, __list
+!try add(add(3,4),add(3,4)), __map, __list = 14, __map, __list
+
+!try sub(8,4), __map, __list = 4, __map, __list
+!try sub(sub(8,4),sub(8,6)), __map, __list = 2, __map, __list
+
+!try mul(3,4), __map, __list = 12, __map, __list
+!try mul(add(1,2),add(3,4)), __map, __list = 21, __map, __list
+
+!try div(4,2), __map, __list = 2, __map, __list
+!try div(add(2,2),add(1,1)), __map, __list = 2, __map, __list
+
+!try mod(16,3), __map, __list = 1, __map, __list
+!try mod(add(8,8),3), __map, __list = 1, __map, __list
+
+!try exp(2,2), __map, __list = 4, __map, __list
+!try exp(add(5,5),add(2,1)), __map, __list = 1000, __map, __list
+
+!try neg(15), __map, __list = -15, __map, __list
+!try neg(sub(8,15)), __map, __list = 7, __map, __list
+
+(* Syntax Tests *)
+!try seq(assign(a,6), seq(assign(b,9), while(ne(deref(a), deref(b)), if(gt(deref(a), deref(b)), assign(a, sub(deref(a), deref(b))), assign(b, sub(deref(b), deref(a))))))), __map, __list
+
+!try 
+" a = 6
+b = 9
+while (a != b) {
+  if (a > b) {
+    a = a - b
+  } else {
+    b = b - a
+  }   
+} "
+
+!try
+" add = 3 + 4
+sub = 5 - 2
+mul = 3 * 4
+div = 6 / 3
+mod = 7 % 4
+exp = 2 ^ 3
+if (12 == 6 + 6) {
+  eq = 't'
+} else {
+  eq = 'f'
+} "
+
+!try
+" bt = true
+bf = false
+if (bt == true) {
+  bf = true
+} 
+c = `c
+i = 64
+r = 3.1415 
+st = 'hello' "
+
+!try 
+" a = true == false
+b = true != false "
+
+!try 
+" a = `c == `d
+b = `c != `d
+c = `c < `d
+d = `c > `d
+e = `c <= `d
+f = `c >= `d
+g = `c === `d "
+
+!try 
+" a = 3 == 6
+b = 3 != 6
+c = 3 < 6
+d = 3 > 6
+e = 3 <= 6
+f = 3 >= 6
+g = 3 === 6
+h = 3 + 6
+i= 3 - 6
+j = 3 * 6
+k = 3 / 6
+l = 3 % 6
+m = 3 ^ 2 "
+
+!try 
+" a = 3.14 == 6.28
+b = 3.14 != 6.28
+c = 3.14 < 6.28
+d = 3.14 > 6.28
+e = 3.14 <= 6.28
+f = 3.14 >= 6.28
+g = 3.14 === 6.28
+h = 3.14 + 6.28
+i= 3.14 - 6.28
+j = 3.14 * 6.28
+k = 3.14 / 6.28
+l = 3.14 % 6.28 
+m = 3.14 ^ 2.00 "
+
+!try 
+" a = 'hi' == 'no'
+b = 'hi' != 'no'
+c = 'hi' < 'no'
+d = 'hi' > 'no'
+e = 'hi' <= 'no'
+f = 'hi' >= 'no'
+g = 'hi' === 'no' "
+
+!try 
+" a = 6 - 3
+b = 6.28 - 3.28
+c = -a
+d = -b
+e = a++
+f = a--
+g = b++
+h = b--
+"
+!try 
+" a = 2 > 3 or 4 < 5
+b = 2 > 3 xor 4 < 5
+c = 2 > 3 and 4 < 5
+if (2 > 3 or 'hi' == 'hi' and 4 < 5 ) {
+  mybool = 4 > 3 or 1 < 2
+}
+"
+
+!try
+" a = 1 + 5 * 2
+i = 0
+for(i < 5, i = i + 2) {
+  a = a + 1
+}
+print(a)
+print(i)
+b = []
+"
