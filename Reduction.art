@@ -239,11 +239,11 @@ operand ::= __bool^^ | __char^^ | __int32^^ | __real64^^ | __string^^ | deref^^ 
 (* Plugin Tests *)
 !try "plugin('init')"
 !try "playNote('D')"
-!try "playNote('D', 'G')"
-!try "playNote('D', 'G', 'C')"
-!try "playChord('D')"
-!try "playChord('D', 'G')"
-!try "playChord('D', 'G', 'C')"
+!try "playNote('G')"
+!try "playNote('C')"
+!try "playChord('D', 'major')"
+!try "playChord('G', 'major')"
+!try "playChord('C', 'major')"
 
 
 (* Feature Tests *)

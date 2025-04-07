@@ -565,7 +565,7 @@ e4 <v:Object a:ArrayList> ::=
 | ID '()' !! interpret(procedures.get(ID1.v)); e4.v = variables.get(functionReturns.get(ID1.v)); !! // syntax: *variable ID* = *function ID*();
 
 
-// Lexical rules
+// lexical rules.
 LINE_COMMENT <v:String> ::= &COMMENT_LINE_C !! LINE_COMMENT.v = lexemeCore().translateEscapes(); !!
 BLOCK_COMMENT <v:String> ::= &COMMENT_BLOCK_C !! BLOCK_COMMENT.v = lexemeCore().translateEscapes(); !!
 ID <v:String> ::= &ID !! ID.v = lexeme(); !!
